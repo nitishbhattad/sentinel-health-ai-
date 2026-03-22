@@ -16,8 +16,7 @@ A full-stack clinical AI platform that predicts patient risk using real MIMIC-II
 ---
 
 ## 📸 Screenshots
-![Dashboard](screenshots/dashboard.png)
-![Patient Profile](screenshots/patient_profile.png)
+![Dashboard](screenshots/dashboard.png) ![Patient Profile](screenshots/patient_profile.png)
 | Dashboard | Patient Profile |
 |---|---|
 | 46,520 real patients, live risk stats | ICU assignment, risk bar, SHAP features |

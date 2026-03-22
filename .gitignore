@@ -1,0 +1,13 @@
+data/mimic/
+*.csv
+*.csv.gz
+*.sql
+*.gz
+healthcare_backup.sql
+mimic_clean_backup.sql
+__pycache__/
+*.pyc
+.env
+.DS_Store
+models/chromadb/
+*.log

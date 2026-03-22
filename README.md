@@ -326,5 +326,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 **Nitish Bhattad**
 MS Data Science, University of Massachusetts Dartmouth
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://linkedin.com/in/yourprofile)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?logo=github)](https://github.com/yourusername)
+

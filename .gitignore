@@ -11,3 +11,9 @@ __pycache__/
 .DS_Store
 models/chromadb/
 *.log
+exporting
+naming
+reading
+resolving
+transferring
+writing

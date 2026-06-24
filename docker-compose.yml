@@ -28,6 +28,8 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/healthcare_db
       OLLAMA_HOST: http://host.docker.internal:11434
+      API_BASE: http://localhost:8000
+
     volumes:
       - ./models:/app/models
       - ./data:/app/data

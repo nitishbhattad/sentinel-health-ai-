@@ -22,7 +22,8 @@ def load_notes(subject_id: int = None) -> list[Document]:
         query = """
             SELECT subject_id, hadm_id, charttime, category, text
             FROM notes
-            ORDER BY subject_id, charttime;
+            ORDER BY subject_id, charttime
+            LIMIT 10000;
         """
 
     df = pd.read_sql(query, engine)

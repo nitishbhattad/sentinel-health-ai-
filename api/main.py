@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from api.routers import patients, chat
+from api.routers import patients, chat, agent
 
 app = FastAPI(
     title="Healthcare Risk API",
@@ -18,6 +18,7 @@ app.add_middleware(
 
 app.include_router(patients.router)
 app.include_router(chat.router)
+app.include_router(agent.router)
 
 CSS = """
 :root {
@@ -123,7 +124,7 @@ function setBadge(elId,tier){
     var d={HIGH:"#7f1d1d",MEDIUM:"#78350f",LOW:"#14532d"};
     var el=document.getElementById(elId);
     if(el && c[tier]){
-        el.innerHTML="<span style=\\"display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:"+b[tier]+";color:"+c[tier]+";border:1px solid "+d[tier]+";\\">"+ tier +"</span>";
+        el.innerHTML="<span style='display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:"+b[tier]+";color:"+c[tier]+";border:1px solid "+d[tier]+";'>"+ tier +"</span>";
     }
 }
 
@@ -180,7 +181,7 @@ function filterPatients(tier){
     if(ac)ac.classList.add("active");
     var wrap=document.getElementById("inlineTableWrap");
     wrap.classList.add("show");
-    document.getElementById("inlineTableContainer").innerHTML="<span class=\\"loading\\">Loading...</span>";
+    document.getElementById("inlineTableContainer").innerHTML="<span class='loading'>Loading...</span>";
     var titles={ALL:"All Patients",HIGH:"High Risk Patients",MEDIUM:"Medium Risk Patients",LOW:"Low Risk Patients"};
     document.getElementById("inlineTableTitle").textContent=titles[tier];
     setTimeout(function(){wrap.scrollIntoView({behavior:"smooth",block:"start"});},100);
@@ -197,18 +198,18 @@ function filterPatients(tier){
             var bc={HIGH:"#3b0f0f",MEDIUM:"#3b2a00",LOW:"#0a2e1a"};
             var tc={HIGH:"#f87171",MEDIUM:"#fbbf24",LOW:"#34d399"};
             var bd={HIGH:"#7f1d1d",MEDIUM:"#78350f",LOW:"#14532d"};
-            var bh="<span style=\\"display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:"+bc[p.risk_tier]+";color:"+tc[p.risk_tier]+";border:1px solid "+bd[p.risk_tier]+";\\">"+ p.risk_tier +"</span>";
-            return "<tr onclick=\\"selectPatient("+p.subject_id+")\\">"
-                +"<td style=\\"color:var(--text);font-weight:700;\\">"+p.subject_id+"</td>"
-                +"<td style=\\"color:"+rc+";font-weight:700;\\">"+(p.risk_score*100).toFixed(1)+"%</td>"
+            var bh="<span style='display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:"+bc[p.risk_tier]+";color:"+tc[p.risk_tier]+";border:1px solid "+bd[p.risk_tier]+";'>"+ p.risk_tier +"</span>";
+            return "<tr onclick='selectPatient("+p.subject_id+")'>"
+                +"<td style='color:var(--text);font-weight:700;'>"+p.subject_id+"</td>"
+                +"<td style='color:"+rc+";font-weight:700;'>"+(p.risk_score*100).toFixed(1)+"%</td>"
                 +"<td>"+bh+"</td>"
                 +"<td>"+p.admission_count+"</td>"
                 +"<td>"+(p.emergency_ratio*100).toFixed(1)+"%</td>"
                 +"</tr>";
         }).join("");
         document.getElementById("inlineTableContainer").innerHTML=
-            "<p style=\\"font-size:12px;color:var(--muted);margin-bottom:12px;\\">"+data.length+" patients</p>"
-            +"<table class=\\"rt\\"><thead><tr><th>Patient ID</th><th>Risk Score</th><th>Tier</th><th>Admissions</th><th>Emergency %</th></tr></thead>"
+            "<p style='font-size:12px;color:var(--muted);margin-bottom:12px;'>"+data.length+" patients</p>"
+            +"<table class='rt'><thead><tr><th>Patient ID</th><th>Risk Score</th><th>Tier</th><th>Admissions</th><th>Emergency %</th></tr></thead>"
             +"<tbody>"+rows+"</tbody></table>";
     })
     .catch(function(e){
@@ -268,7 +269,7 @@ function searchPatient(){
 function getRisk(){
     var id=document.getElementById("riskPatientId").value;
     if(!id)return;
-    document.getElementById("riskResult").innerHTML="<span class=\\"loading\\">Loading...</span>";
+    document.getElementById("riskResult").innerHTML="<span class='loading'>Loading...</span>";
     fetch(API+"/patients/"+id+"/risk")
     .then(function(r){return r.json();})
     .then(function(d){
@@ -301,7 +302,7 @@ function downloadReport(){
 function getExplanation(){
     var id=document.getElementById("explainPatientId").value;
     if(!id)return;
-    document.getElementById("explainResult").innerHTML="<span class=\\"loading\\">Generating...</span>";
+    document.getElementById("explainResult").innerHTML="<span class='loading'>Generating...</span>";
     fetch(API+"/patients/"+id+"/explain")
     .then(function(r){return r.json();})
     .then(function(d){
@@ -314,16 +315,16 @@ function getWardTimeline(){
     var id=document.getElementById("wardPatientId").value;
     if(!id)return;
     document.getElementById("wardBadge").innerHTML="<div>...</div>";
-    document.getElementById("wardTimeline").innerHTML="<span class=\\"loading\\">Generating discharge plan...</span>";
+    document.getElementById("wardTimeline").innerHTML="<span class='loading'>Generating discharge plan...</span>";
     fetch(API+"/patients/"+id+"/ward")
     .then(function(r){return r.json();})
     .then(function(d){
         var color=wardColors[d.predicted_ward]||"#60a5fa";
         document.getElementById("wardBadge").innerHTML=
-            "<div style=\\"font-size:32px;font-weight:800;color:"+color+";\\">"+ d.predicted_ward +"</div>"
-            +"<div style=\\"font-size:11px;margin-top:6px;color:var(--muted);\\">~"+(d.estimated_los_days||0).toFixed(1)+" days</div>"
-            +"<div style=\\"margin-top:8px;font-size:11px;font-weight:700;color:"+color+";\\">"+ d.risk_tier +"</div>"
-            +"<div style=\\"font-size:11px;margin-top:4px;color:"+color+";\\">"+(d.risk_score*100).toFixed(1)+"% risk</div>";
+            "<div style='font-size:32px;font-weight:800;color:"+color+";'>"+ d.predicted_ward +"</div>"
+            +"<div style='font-size:11px;margin-top:6px;color:var(--muted);'>~"+(d.estimated_los_days||0).toFixed(1)+" days</div>"
+            +"<div style='margin-top:8px;font-size:11px;font-weight:700;color:"+color+";'>"+ d.risk_tier +"</div>"
+            +"<div style='font-size:11px;margin-top:4px;color:"+color+";'>"+(d.risk_score*100).toFixed(1)+"% risk</div>";
         document.getElementById("wardTimeline").textContent=d.discharge_timeline;
     })
     .catch(function(e){
@@ -337,8 +338,8 @@ function sendChat(){
     var question=document.getElementById("chatInput").value.trim();
     if(!id||!question)return;
     var messages=document.getElementById("chatMessages");
-    messages.innerHTML+="<div class=\\"mu\\"><span>"+question+"</span></div>";
-    messages.innerHTML+="<div class=\\"mb2\\" id=\\"typing\\"><span class=\\"loading\\">Thinking...</span></div>";
+    messages.innerHTML+="<div class='mu'><span>"+question+"</span></div>";
+    messages.innerHTML+="<div class='mb2' id='typing'><span class='loading'>Thinking...</span></div>";
     document.getElementById("chatInput").value="";
     messages.scrollTop=messages.scrollHeight;
     fetch(API+"/chat/",{
@@ -349,12 +350,43 @@ function sendChat(){
     .then(function(r){return r.json();})
     .then(function(d){
         var t=document.getElementById("typing");
-        if(t)t.outerHTML="<div class=\\"mb2\\"><span>"+d.answer+"</span></div>";
+        if(t)t.outerHTML="<div class='mb2'><span>"+d.answer+"</span></div>";
         messages.scrollTop=messages.scrollHeight;
     })
     .catch(function(e){
         var t=document.getElementById("typing");
-        if(t)t.outerHTML="<div class=\\"mb2\\"><span>Error: "+e.message+"</span></div>";
+        if(t)t.outerHTML="<div class='mb2'><span>Error: "+e.message+"</span></div>";
+    });
+    
+}
+function runAgentAnalysis(){
+    var id=document.getElementById("agentPatientId").value;
+    var query=document.getElementById("agentQuery").value.trim();
+    if(!id){alert("Enter a patient ID first");return;}
+    if(!query){query="Assess this patient risk and provide clinical recommendations.";}
+    var status=document.getElementById("agentStatus");
+    var statusText=document.getElementById("agentStatusText");
+    var result=document.getElementById("agentResult");
+    status.style.display="block";
+    statusText.innerHTML="<span class='loading'>Running Risk Agent...</span>";
+    result.innerHTML="<span class='loading'>Running 3 agents in sequence...</span>";
+    fetch(API+"/agent/"+id+"/analyze?query="+encodeURIComponent(query))
+    .then(function(r){return r.json();})
+    .then(function(d){
+        status.style.display="none";
+        if(d.error && !d.clinical_report){
+            result.textContent="Error: "+d.error;
+            return;
+        }
+        var report=d.clinical_report||"No report generated.";
+        result.innerHTML="<strong style='color:var(--blue);'>" + d.patient_id + " | " +(d.risk_score*100).toFixed(1)+"% "+d.risk_tier+" | Ward: "+d.predicted_ward+"</strong><br><br>"+report;
+
+
+        document.getElementById("agentPatientId").value=id;
+    })
+    .catch(function(e){
+        status.style.display="none";
+        result.textContent="Error: "+e.message;
     });
 }
 
@@ -497,6 +529,19 @@ HTML = """<!DOCTYPE html>
         <input id="chatInput" type="text" placeholder="Ask about symptoms, medications, admissions..." onkeypress="if(event.key===&apos;Enter&apos;)sendChat()"/>
         <button class="btn" onclick="sendChat()">Send</button>
     </div>
+</div>
+
+<div class="card mb16">
+    <div class="ctitle">🤖 Multi-Agent Clinical Analysis</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input id="agentPatientId" type="number" placeholder="Patient ID (e.g. 19246)" style="width:200px;margin:0;"/>
+        <input id="agentQuery" type="text" placeholder="Ask a clinical question..." style="margin:0;flex:1;"/>
+        <button class="btn" onclick="runAgentAnalysis()">Run Analysis</button>
+    </div>
+    <div id="agentStatus" style="display:none;margin-bottom:8px;">
+        <span id="agentStatusText" class="loading">Running agents...</span>
+    </div>
+    <div class="result" id="agentResult">Enter a patient ID and clinical question above...</div>
 </div>
 
 </div>

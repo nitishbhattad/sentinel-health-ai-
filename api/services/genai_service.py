@@ -44,7 +44,7 @@ def get_vector_store():
     )
 
 # Load once when module imports
-vectorstore = get_vector_store()
+vectorstore = None
 
 # ── RAG Chat ──────────────────────────────────────────────────────
 def rag_chat(subject_id: int, question: str) -> dict:

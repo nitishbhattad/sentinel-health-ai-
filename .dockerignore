@@ -1,0 +1,4 @@
+models/chromadb/
+*.sql
+mimic_clean_backup.sql
+healthcare_backup.sql
